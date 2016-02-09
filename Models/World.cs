@@ -3,7 +3,7 @@ using System.Collections;
 
 public class World {
 
-	Tile[,] tiles;
+	Cell[,] cells;
 
 	public int Width { get; protected set; }
 	public int Height { get; protected set; }
@@ -12,39 +12,39 @@ public class World {
 		this.Width = width;
 		this.Height = height;
 
-		tiles = new Tile[width, height];
+		cells = new Cell[width, height];
 
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
-				tiles[x,y] = new Tile(this, x, y);
+				cells[x,y] = new Cell(this, x, y);
 			}
 		}
 
-		Debug.Log ((width * height) + " Tiles");
+		Debug.Log ((width * height) + " Cells");
 	}
 
-	public void RandomizeTiles() {
+	public void RandomiseCells() {
 		for (int x = 0; x < Width; x++) {
 			for (int y = 0; y < Height; y++) {
 				if(Random.Range(0, 2) == 0) {
-					tiles [x, y].Alive = true;
+					cells [x, y].Alive = true;
 				} else {
-					tiles[x,y].Alive = false;
+					cells[x,y].Alive = false;
 				}
 			}
 		}
 	}
 
-	public Tile GetTileAt(int x, int y) {
+	public Cell GetCellAt(int x, int y) {
 		if (x >= Width || x < 0 || y >= Height || y < 0) {
-//			Debug.LogError ("Tile (" + x + "," + y + ") is out of range.");
+//			Debug.LogError ("Cell (" + x + "," + y + ") is out of range.");
 			return null;
 		}
 
-		return tiles[x,y];
+		return cells[x,y];
 	}
 
-	public Tile[,] GetTiles() {
-		return tiles;
+	public Cell[,] GetCells() {
+		return cells;
 	}
 }

@@ -5,6 +5,7 @@ public class WorldController : MonoBehaviour {
 	public Sprite floorSprite;
 	public int worldWidth, worldHeight;
 	public bool startRandomised;
+	public Color cellColours;
 
 	public static WorldController Instance { get; protected set; }
 	public World World { get; protected set; }
@@ -21,20 +22,20 @@ public class WorldController : MonoBehaviour {
 
 		for (int x = 0; x < World.Width; x++) {
 			for (int y = 0; y < World.Height; y++) {
-				Tile tile = World.GetTileAt (x, y);
+				Cell cell = World.GetCellAt (x, y);
 
-				GameObject tile_go = new GameObject ();
-				tile_go.name = "Tile_" + x + "_" + y;
-				tile_go.transform.position = new Vector3 (tile.X, tile.Y, 0);
-				tile_go.transform.SetParent (this.transform, true);
-				tile_go.AddComponent<SpriteRenderer> ();
+				GameObject go = new GameObject ();
+				go.name = "Cell_" + x + "_" + y;
+				go.transform.position = new Vector3 (cell.X, cell.Y, 0);
+				go.transform.SetParent (this.transform, true);
+				go.AddComponent<SpriteRenderer> ().color = cellColours;
 
-				tile.RegisterTileChangedCallback ( t => { OnTileChanged(tile, tile_go); } );
+				cell.RegisterCellChangedCallback ( t => { OnCellChanged(cell, go); } );
 			}
 		}
 		
 		if(startRandomised)
-			World.RandomizeTiles ();
+			World.RandomiseCells ();
 	}
 	
 	// Update is called once per frame
@@ -44,31 +45,31 @@ public class WorldController : MonoBehaviour {
 		if (elapsedTime > secondsPerGeneration) {
 			elapsedTime = 0f;
 
-			foreach (Tile t in World.GetTiles()) {
+			foreach (Cell t in World.GetCells()) {
 				t.calculateNumNeighbours ();
 			}
 
-			foreach (Tile t in World.GetTiles()) {
+			foreach (Cell t in World.GetCells()) {
 				t.calculateLivingState ();
 			}
 		}
 	}
 
-	void OnTileChanged(Tile tile, GameObject tile_go) {
-		if(tile.Alive) {
-			tile_go.GetComponent<SpriteRenderer> ().sprite = floorSprite;
+	void OnCellChanged(Cell cell, GameObject go) {
+		if(cell.Alive) {
+			go.GetComponent<SpriteRenderer> ().sprite = floorSprite;
 		} else {
-			tile_go.GetComponent<SpriteRenderer> ().sprite = null;
+			go.GetComponent<SpriteRenderer> ().sprite = null;
 		}
 	}
 
-	public Tile GetTileAt(Vector3 coord) {
-		return WorldController.Instance.World.GetTileAt (
+	public Cell GetCellAt(Vector3 coord) {
+		return WorldController.Instance.World.GetCellAt (
 			Mathf.FloorToInt (coord.x),
 			Mathf.FloorToInt (coord.y));
 	}
 
-	public Tile GetTileAt(int x, int y) {
-		return WorldController.Instance.World.GetTileAt (x, y);
+	public Cell GetCellAt(int x, int y) {
+		return WorldController.Instance.World.GetCellAt (x, y);
 	}
 }
