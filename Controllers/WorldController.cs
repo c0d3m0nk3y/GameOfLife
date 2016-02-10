@@ -2,6 +2,8 @@
 using System.Collections;
 
 public class WorldController : MonoBehaviour {
+
+	bool running;
 	public Sprite floorSprite;
 	public int worldWidth, worldHeight;
 	public bool startRandomised;
@@ -17,6 +19,8 @@ public class WorldController : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		Instance = this;
+
+		running = false;
 
 		World = new World (worldWidth, worldHeight);
 
@@ -40,6 +44,9 @@ public class WorldController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+		if (!running)
+			return;
+		
 		elapsedTime += Time.deltaTime;
 
 		if (elapsedTime > secondsPerGeneration) {
@@ -71,5 +78,9 @@ public class WorldController : MonoBehaviour {
 
 	public Cell GetCellAt(int x, int y) {
 		return WorldController.Instance.World.GetCellAt (x, y);
+	}
+
+	public void toggleRunning() {
+		running = !running;
 	}
 }
