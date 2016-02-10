@@ -1,3 +1,3 @@
 # GameOfLife
 
-init
+init foo
