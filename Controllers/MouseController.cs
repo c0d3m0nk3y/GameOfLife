@@ -1,18 +1,23 @@
 ﻿using UnityEngine;
-using System.Collections;
+using System.Collections.Generic;
 
 public class MouseController : MonoBehaviour {
 
 	Vector3 previousPos, currentPos, dragStartPos;
 	public float scrollSpeed, maxSize, minSize, panSpeed;
 
-	GameObject cursor;
 	public Sprite cursorSprite;
+	GameObject cursor;
+	public Color highlightColour;
+	public GameObject placeHighlight;
+	List<GameObject> highlightList;
 
 	void Start() {
 		cursor = new GameObject ();
 		cursor.AddComponent<SpriteRenderer> ().sprite = cursorSprite;
 		cursor.GetComponent<SpriteRenderer> ().sortingLayerName = "UI";
+
+		highlightList = new List<GameObject> ();
 	}
 
 	// Update is called once per frame
@@ -31,26 +36,55 @@ public class MouseController : MonoBehaviour {
 	}
 
 	void DragPlace() {
+		RemoveHighlights ();
+
 		StartDrag ();
 
-		EndDrag ();
+		// we want to make sure that start is smaller than end so we can
+		// drag both directions on an axis, otherwise the loop condition
+		// would instantly be met.
+		int startX = Mathf.FloorToInt (Mathf.Min (dragStartPos.x, currentPos.x));
+		int endX = Mathf.FloorToInt (Mathf.Max (dragStartPos.x, currentPos.x));
+
+		int startY = Mathf.FloorToInt (Mathf.Min (dragStartPos.y, currentPos.y));
+		int endY = Mathf.FloorToInt (Mathf.Max (dragStartPos.y, currentPos.y));
+		
+		PreviewDrag (startX, endX, startY, endY);
+
+		EndDrag (startX, endX, startY, endY);
 	}
 
-	void EndDrag() {
-		if (Input.GetMouseButtonUp (0)) {
+	void RemoveHighlights() {
+		while (highlightList.Count > 0) {
+			GameObject go = highlightList [highlightList.Count - 1];
+			highlightList.RemoveAt (highlightList.Count - 1);
+			SimplePool.Despawn (go);
+		}
+	}
 
-			// we want to make sure that start is smaller than end so we can
-			// drag both directions on an axis, otherwise the loop condition
-			// would instantly be met.
-			int startX = Mathf.FloorToInt (Mathf.Min (dragStartPos.x, currentPos.x));
-			int endX = Mathf.FloorToInt (Mathf.Max (dragStartPos.x, currentPos.x));
-
-			int startY = Mathf.FloorToInt (Mathf.Min (dragStartPos.y, currentPos.y));
-			int endY = Mathf.FloorToInt (Mathf.Max (dragStartPos.y, currentPos.y));
+	void PreviewDrag(int startX, int endX, int startY, int endY) {
+		if (Input.GetMouseButton (0)) {
 
 			for (int x = startX; x <= endX; x++) {
 				for (int y = startY; y <= endY; y++) {
-					Tile t = GetTileAt (x, y);
+					Cell t = GetCellAt (x, y);
+					if (t != null) {
+						GameObject go = SimplePool.Spawn (placeHighlight, new Vector3 (x, y, 0), Quaternion.identity);
+						go.transform.SetParent (this.transform, true);
+						go.GetComponent<SpriteRenderer> ().color = highlightColour;
+						highlightList.Add (go);
+					}
+				}
+			}
+		}
+	}
+
+	void EndDrag(int startX, int endX, int startY, int endY) {
+		if (Input.GetMouseButtonUp (0)) {
+
+			for (int x = startX; x <= endX; x++) {
+				for (int y = startY; y <= endY; y++) {
+					Cell t = GetCellAt (x, y);
 					if (t != null) {
 						t.Toggle ();
 					}
@@ -81,13 +115,13 @@ public class MouseController : MonoBehaviour {
 	}
 		
 
-	Tile GetTileAt(Vector3 coord) {
-		return WorldController.Instance.GetTileAt (
+	Cell GetCellAt(Vector3 coord) {
+		return WorldController.Instance.GetCellAt (
 			Mathf.FloorToInt (coord.x),
 			Mathf.FloorToInt (coord.y));
 	}
 
-	Tile GetTileAt(int x, int y) {
-		return WorldController.Instance.GetTileAt (x, y);
+	Cell GetCellAt(int x, int y) {
+		return WorldController.Instance.GetCellAt (x, y);
 	}
 }
