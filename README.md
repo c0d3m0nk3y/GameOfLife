@@ -1,3 +1,3 @@
 # GameOfLife
 
-init foo ssh
+init
