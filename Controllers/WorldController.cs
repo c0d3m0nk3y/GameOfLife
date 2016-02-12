@@ -1,5 +1,6 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System;
+using UnityEngine;
+using System.Collections.Generic;
 
 public class WorldController : MonoBehaviour {
 
@@ -12,9 +13,20 @@ public class WorldController : MonoBehaviour {
 	public static WorldController Instance { get; protected set; }
 	public World World { get; protected set; }
 
+	Dictionary<Cell, GameObject> cellMap;
+
 	float elapsedTime = 0f;
 
 	public float secondsPerGeneration = 1f;
+
+	public float SecondsPerGeneration {
+		get {
+			return secondsPerGeneration;
+		}
+		set {
+			secondsPerGeneration = value;
+		}
+	}
 
 	// Use this for initialization
 	void Start () {
@@ -23,6 +35,8 @@ public class WorldController : MonoBehaviour {
 		running = false;
 
 		World = new World (worldWidth, worldHeight);
+
+		cellMap = new Dictionary<Cell, GameObject> ();
 
 		for (int x = 0; x < World.Width; x++) {
 			for (int y = 0; y < World.Height; y++) {
@@ -34,12 +48,19 @@ public class WorldController : MonoBehaviour {
 				go.transform.SetParent (this.transform, true);
 				go.AddComponent<SpriteRenderer> ().color = cellColours;
 
-				cell.RegisterCellChangedCallback ( t => { OnCellChanged(cell, go); } );
+				cellMap.Add (cell, go);
+
+
+				cell.RegisterCellChangedCallback (  OnCellChanged  );
 			}
 		}
 		
 		if(startRandomised)
 			World.RandomiseCells ();
+	}
+
+	public void setSecondsPerGen(float f) {
+		secondsPerGeneration = f;
 	}
 	
 	// Update is called once per frame
@@ -62,11 +83,33 @@ public class WorldController : MonoBehaviour {
 		}
 	}
 
-	void OnCellChanged(Cell cell, GameObject go) {
+	void OnCellChanged(Cell cell) {
+		if (!cellMap.ContainsKey (cell)) {
+			Debug.LogError ("OnCellChanged cannot find " + cell + " in the Dictionary");
+			return;
+		}
+
+		GameObject go = cellMap [cell];
+
 		if(cell.Alive) {
 			go.GetComponent<SpriteRenderer> ().sprite = floorSprite;
 		} else {
 			go.GetComponent<SpriteRenderer> ().sprite = null;
+		}
+	}
+
+	void DestroyAllTileGameObjects() {
+
+		while(cellMap.Count > 0) {
+			Cell cell = cellMap.Keys [0];
+			GameObject go = cellMap [cell];
+
+			cellMap.Remove (cell);
+
+			cell.UnregisterCellChangedCallback (OnCellChanged);
+
+			Destroy (go);
+
 		}
 	}
 
@@ -82,5 +125,9 @@ public class WorldController : MonoBehaviour {
 
 	public void toggleRunning() {
 		running = !running;
+	}
+
+	public void randomiseCells() {
+		World.RandomiseCells ();
 	}
 }
