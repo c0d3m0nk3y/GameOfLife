@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using UnityEngine;
 using System.Collections.Generic;
 
@@ -101,7 +102,7 @@ public class WorldController : MonoBehaviour {
 	void DestroyAllTileGameObjects() {
 
 		while(cellMap.Count > 0) {
-			Cell cell = cellMap.Keys [0];
+			Cell cell = cellMap.Keys.First();
 			GameObject go = cellMap [cell];
 
 			cellMap.Remove (cell);
