@@ -2,6 +2,7 @@
 using System.Linq;
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.UI;
 
 public class WorldController : MonoBehaviour {
 
@@ -19,15 +20,16 @@ public class WorldController : MonoBehaviour {
 	float elapsedTime = 0f;
 
 	public float secondsPerGeneration = 1f;
+	public Slider secondsPerGen;
 
-	public float SecondsPerGeneration {
-		get {
-			return secondsPerGeneration;
-		}
-		set {
-			secondsPerGeneration = value;
-		}
-	}
+//	public float SecondsPerGeneration {
+//		get {
+//			return secondsPerGeneration;
+//		}
+//		set {
+//			secondsPerGeneration = value;
+//		}
+//	}
 
 	// Use this for initialization
 	void Start () {
@@ -58,11 +60,12 @@ public class WorldController : MonoBehaviour {
 		
 		if(startRandomised)
 			World.RandomiseCells ();
+		
 	}
 
-	public void setSecondsPerGen(float f) {
-		secondsPerGeneration = f;
-	}
+//	public void setSecondsPerGen(float f) {
+//		secondsPerGeneration = f;
+//	}
 	
 	// Update is called once per frame
 	void Update () {
@@ -70,6 +73,8 @@ public class WorldController : MonoBehaviour {
 			return;
 		
 		elapsedTime += Time.deltaTime;
+
+		secondsPerGeneration = secondsPerGen.value;
 
 		if (elapsedTime > secondsPerGeneration) {
 			elapsedTime = 0f;
