@@ -49,8 +49,8 @@ public class WorldController : MonoBehaviour {
 				go.name = "Cell_" + x + "_" + y;
 				go.transform.position = new Vector3 (cell.X, cell.Y, 0);
 				go.transform.SetParent (this.transform, true);
-				go.AddComponent<SpriteRenderer> ().color = cellColours;
-
+//				go.AddComponent<SpriteRenderer> ().color = cellColours;
+				go.AddComponent<SpriteRenderer> ().sprite = floorSprite;
 				cellMap.Add (cell, go);
 
 
@@ -98,9 +98,9 @@ public class WorldController : MonoBehaviour {
 		GameObject go = cellMap [cell];
 
 		if(cell.Alive) {
-			go.GetComponent<SpriteRenderer> ().sprite = floorSprite;
+			go.GetComponent<SpriteRenderer> ().color = cellColours;
 		} else {
-			go.GetComponent<SpriteRenderer> ().sprite = null;
+			go.GetComponent<SpriteRenderer> ().color = Color.white;
 		}
 	}
 
